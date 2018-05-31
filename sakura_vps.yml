@@ -1,0 +1,38 @@
+- hosts: all
+
+  vars_prompt:
+    - name: "username"
+      prompt: "Enter username"
+      default: app
+      private: no
+    - name: "password"
+      prompt: "Enter password"
+      default: "S(X84gZQZxBbi~E6rt_m"
+      private: yes
+      encrypt: "sha512_crypt"
+
+  tasks:
+    - name: Upgrade all packages
+      yum:
+        name: '*'
+        state: latest
+
+    - name: Create User
+      user:
+        name: "{{ username }}"
+        password: "{{ password }}"
+        groups: wheel
+
+    - name: Set wheel group nopasswd
+      lineinfile:
+        path: /etc/sudoers
+        regexp: '^%wheel\s'
+        line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+        state: present
+
+    - name: Open http port
+      firewalld:
+        service: http
+        permanent: true
+        state: enabled
+        immediate: yes
