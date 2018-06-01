@@ -36,3 +36,27 @@
         permanent: true
         state: enabled
         immediate: yes
+
+    - name: Set authorized key took from file
+      authorized_key:
+        user: "{{ username }}"
+        key: "{{ lookup('file', 'id_rsa.pub') }}"
+
+    - name: Edit sshd_config PermitRootLogin no
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PermitRootLogin"
+        insertafter: "^#PermitRootLogin"
+        line: "PermitRootLogin no"
+
+    - name: Edit sshd_config PasswordAuthentication no
+      lineinfile:
+        dest: /etc/ssh/sshd_config
+        regexp: "^PasswordAuthentication"
+        insertafter: "^#PasswordAuthentication"
+        line: "PasswordAuthentication no"
+
+    - name: Restart sshd
+      systemd:
+        name: sshd
+        state: restarted
